@@ -1,0 +1,50 @@
+//Design
+module dff(d,clk,rst,q);
+  input d,clk,rst;
+  output reg q;
+  always@(negedge clk)
+  begin
+    if(rst==1)
+      q<=0;
+    else
+      q<=d;
+  end
+endmodule    
+
+module jcounter(clk,rst,o);
+  input clk,rst;
+  output reg[3:0] o;
+  wire t1,t2,t3,t4;
+  
+  dff p(~t4,clk,rst,t1);
+  dff q(t1,clk,rst,t2);
+  dff r(t2,clk,rst,t3);
+  dff s(t3,clk,rst,t4);
+  
+  always@(*)
+  	o = {t1,t2,t3,t4};
+  
+endmodule
+
+//Test Bench
+module test;
+  reg clk,rst;
+  reg [3:0] o;
+  jcounter x(clk,rst,o);
+  
+  initial
+    begin
+    	clk = 1'b0;
+    	forever #5 clk = ~clk;
+    end
+  
+  initial
+    begin
+      rst = 1'b1;
+      #2 rst = 1'b0;
+      #6 $display(o);
+      #11 $display(o);
+      #16 $display(o);
+      #500 $finish;
+    end
+endmodule
