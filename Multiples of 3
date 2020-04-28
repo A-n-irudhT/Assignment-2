@@ -1,0 +1,58 @@
+//Output is not correct
+//Design
+module dff(d,clk,rst,q);
+  input d,clk,rst;
+  output reg q;
+  always@(negedge clk)
+  begin
+    #2 if(rst==1)
+      q <= 0;
+    else
+      q <= d;
+  end
+endmodule
+
+module mul3(x,clk,rst,y);
+  input x, clk, rst;
+  output reg y;
+  reg da,db,qa,qb;
+  
+  dff a(da,clk,rst,qa);
+  dff b(db,clk,rst,qb);
+  
+  always@(negedge clk)
+  begin
+    da <= (qa && ~x) || (qa && ~qb) || (~qa && qb && x);
+    db <= (qb && ~x) || (qa && x) || (~qb && x);
+    y <= (qa && qb && ~x) || (qa && ~qb && x);
+  end
+endmodule
+
+//Test Bench
+module test;
+  reg x,clk,rst,y;
+  mul3 a(x,clk,rst,y);
+  
+  initial
+    begin
+      clk = 0;
+      forever #5 clk = ~clk;
+    end
+  
+  initial
+    begin
+      $dumpfile("test.vcd");
+      $dumpvars(1);
+      
+      #8 rst = 1;
+      #10 rst = 0;
+      #10 x = 0;
+      #10 x = 1;
+      #10 x = 1;
+      #10 x = 0;
+      #10 x = 0;
+      #10 x = 1;
+      #10 x = 1;
+      #10 $finish;
+      end
+endmodule
