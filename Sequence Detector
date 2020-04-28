@@ -1,0 +1,63 @@
+//Design
+module dff(d,clk,q,rst);
+  input d,clk,rst;
+  output reg q;
+  always@(negedge clk)
+  begin
+    #2 if(rst)
+      q<=0;
+    else
+      q<=d;
+  end
+endmodule
+
+module seq(clk,x,y,rsta,rstb);
+  input clk,x,rsta,rstb;
+  output reg y;
+  
+  reg da,db,qa,qb;
+  
+  dff a(da,clk,qa,rsta);
+  dff b(db,clk,qb,rstb);
+  
+  always@(negedge clk)
+    begin
+      da <= (~qa && qb && ~x) || (qa && ~qb && x);
+      db <= (~qb && x) || (~qa && x);
+  		y <= qa && qb && ~x;
+    end
+endmodule
+
+//Test Bench
+module test;
+  reg x,clk,y,rsta,rstb;
+  seq p(clk,x,y,rsta,rstb);
+  
+  initial
+    begin
+      	clk = 1'b0;
+    	forever #5 clk = ~clk;
+    end
+      
+  initial
+    begin 
+      $dumpfile("test.vcd");
+      $dumpvars(1);
+    	#8 x = 0;
+      		rsta = 1;
+      		rstb = 1;
+      	
+      	#10 rsta=0;
+      		rstb=0;
+      		x = 1;
+      
+		#10 x = 1;
+     	#10 x = 0;
+      	#10 x = 1;
+      	#10 x = 0;
+      	#10 x = 1;
+      	#10 x = 0;
+      	#10 $display(y);
+      	#100 $finish;
+  	end
+endmodule
